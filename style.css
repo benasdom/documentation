@@ -104,6 +104,8 @@ body{
     justify-content: space-between;
     flex-direction: row;
 }
+
+
 .lmaintop:nth-child(odd):hover{
 
     background:var(--bder);
@@ -114,6 +116,17 @@ body{
 
 
 }
+.hider:active{
+   
+    background:var(--arrow);
+    box-shadow: 
+    inset -420px 0px 0px 0px rgba(0, 0, 0, 0);
+    letter-spacing: 3px;
+    transition: all .4s ease-in-out;
+
+
+}
+
 .lmaintop:nth-child(even):hover{
 
     background:var(--bder);
@@ -401,6 +414,41 @@ body{
     overflow-y:scroll;
 
 }
+.a{flex-basis:0px !important}
+.b{width:unset !important}
+.c{width:50px;padding:15px !important}
+.d{
+    opacity:0 !important;
+    overflow:hidden !important;
+    width:0px !important}
+.e{
+    transition:width .2s ease-in-out !important;
+    opacity:0 !important;
+    overflow:hidden !important;
+    width:0px !important}
+.hider{
+    position:absolute;
+    top:-15px;
+    right:-15px;
+    height: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin:auto;
+    border-radius: 2px 17px 17px 2px;
+    background:black;
+    z-index:100;
+    transition: opacity .2s ease-in-out;
+    transform:rotateY(180deg);
+     box-shadow: 
+    inset 0px 0px 0px 0px rgba(255, 255, 255, 0.311);
+    width:50px;
+    background:var(--bder);
+    text-align: center;
+    opacity:0;
+
+}
     .lmaintop{
     height: 50px;
     display: flex;
@@ -454,9 +502,30 @@ align-items: flex-end;
 border-bottom: 1px solid var(--bder);
 }
 .subtop{
+    display:flex;
+    width:100%;
+    justify-content:space-between;
     color:var(--stack);
 }
+.subtopa:first-child{
+position:relative;
 
+}
+    .subtopa{
+    display:flex;
+    width:99%;
+    padding:5px;
+    justify-content:space-between;
+    margin-top:2px;
+    color:var(--stack);
+}
+.subtops{
+    display:flex;
+    width:100%;
+    flex-direction:column;
+    justify-content:space-between;
+    color:var(--stack);
+}
 .foot{
     background:var(--back);
     border-top: 1px solid var(--bder);
@@ -579,7 +648,12 @@ border-bottom: 1px solid var(--bder);
 
 
 }
-.leftmain{
+.leftmain:hover .hider{
+    opacity:1;
+    transform:rotateY(180deg);
+
+}
+    .leftmain{
     display: flex;
     flex-basis: 17%;
     height:100%;
