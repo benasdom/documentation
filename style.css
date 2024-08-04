@@ -249,7 +249,7 @@ body{
     align-items: center;
     height:100%;
     flex-direction:row;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin:auto;
     overflow: hidden;
     width:100%;
@@ -259,7 +259,6 @@ body{
 }
 .righttxt{
     height:100%;
-    width: 45%;
     display:flex;
     box-shadow:
     20px 0px 20px rgb(0, 0, 0),
@@ -267,6 +266,7 @@ body{
     align-items:center;
     justify-content:center;
     top:0px;
+    width:280px;
     flex-direction:column;
 }
 .topt{
@@ -294,7 +294,7 @@ body{
 
 .leftpic{
     height:100%;
-    width: 55%;
+    width: 60%;
     display:flex;
     flex-direction:column;
     background:radial-gradient(rgb(38, 38, 44),black 80%);
@@ -406,7 +406,7 @@ body{
     border:4px solid var(--bder);
     top:0;
     border-radius:10px;
-    width:80%;
+    width:700px;
     backdrop-filter: blur(7rem);
     align-self: center;
     font-size: 10px;
