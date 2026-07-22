@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UE Docs — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0b0f;
+    --panel: #111319;
+    --panel-2: #15171f;
+    --border: #23262f;
+    --border-soft: #1c1e26;
+    --text: #f2f3f5;
+    --text-muted: #8a8e99;
+    --text-faint: #5b5f6a;
+    --accent-cyan: #35c7e8;
+    --accent-blue: #3b7cf6;
+    --accent-pink: #ef3fa6;
+    --active-bg: #1a1d26;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  a{ color: inherit; text-decoration: none; }
+  button{ font-family: inherit; cursor: pointer; }
+
+  .app{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      "topbar topbar"
+      "brands brands"
+      "sidebar main"
+      "sidebar footer";
+    min-height: 100vh;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    grid-area: topbar;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 32px 14px;
+    gap: 24px;
+  }
+
+  .breadcrumb{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .breadcrumb .sep{ color: var(--text-faint); font-size: 13px; }
+  .breadcrumb .crumb-muted{ color: var(--text-muted); }
+
+  .topbar-right{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .search{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 14px;
+    width: 260px;
+    color: var(--text-muted);
+  }
+  .search input{
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    width: 100%;
+    font-family: inherit;
+  }
+  .search input::placeholder{ color: var(--text-faint); }
+  .search kbd{
+    font-size: 11px;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  .icon-btn{
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .icon-btn:hover{ color: var(--text); border-color: #33363f; }
+
+  .avatar{
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-pink));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Brand tabs row ---------- */
+  .brands{
+    grid-area: brands;
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    padding: 6px 32px 22px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .brand{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+  }
+  .brand-mark{
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-mark svg{ width: 15px; height: 15px; }
+  .brand.active{ color: var(--text); }
+  .brand:nth-child(1) .brand-mark{ background: radial-gradient(circle at 30% 30%, #4fd8f0, #1a94b3); }
+  .brand:nth-child(2) .brand-mark{ background: radial-gradient(circle at 30% 30%, #5b93ff, #2451c9); }
+  .brand:nth-child(3) .brand-mark{ background: radial-gradient(circle at 30% 30%, #ff6cc4, #c11a80); }
+
+  .brands-more{
+    margin-left: auto;
+    color: var(--text-faint);
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    grid-area: sidebar;
+    width: 240px;
+    padding: 20px 14px 24px;
+    border-right: 1px solid var(--border-soft);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.28s cubic-bezier(.4,0,.2,1);
+    position: relative;
+  }
+  .sidebar.collapsed{ width: 72px; }
+
+  .sidebar-toggle{
+    position: absolute;
+    top: 20px;
+    right: -14px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    z-index: 2;
+  }
+  .sidebar-toggle svg{ width: 13px; height: 13px; transition: transform 0.28s ease; }
+  .sidebar.collapsed .sidebar-toggle svg{ transform: rotate(180deg); }
+
+  .nav-group{ margin-bottom: 22px; }
+  .nav-label{
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    padding: 0 10px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.2s ease;
+  }
+  .sidebar.collapsed .nav-label{ opacity: 0; }
+
+  .nav-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    background: transparent;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .nav-item:hover{ color: var(--text); background: var(--panel); }
+  .nav-item.active{
+    color: var(--text);
+    background: var(--active-bg);
+    border-color: var(--border);
+  }
+  .nav-item .nav-icon{
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-item .nav-icon svg{ width: 18px; height: 18px; }
+  .nav-item .nav-text{
+    transition: opacity 0.15s ease;
+  }
+  .sidebar.collapsed .nav-item{ justify-content: center; }
+  .sidebar.collapsed .nav-item .nav-text{ display: none; }
+  .sidebar.collapsed .nav-group{ display: flex; flex-direction: column; }
+
+  /* ---------- Main content ---------- */
+  .main{
+    grid-area: main;
+    padding: 22px 32px 0;
+  }
+
+  .hero-card{
+    position: relative;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(ellipse at 15% 20%, rgba(53,199,232,0.06), transparent 45%),
+      var(--panel);
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+      radial-gradient(ellipse at 15% 20%, rgba(53,199,232,0.07), transparent 45%);
+    background-size: 28px 28px, 28px 28px, 100% 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 460px;
+    overflow: hidden;
+  }
+
+  .hero-left{
+    padding: 26px 0 34px 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .awaiting-tag{
+    display: inline-flex;
+    width: fit-content;
+    font-size: 12px;
+    color: var(--text-faint);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .welcome-block{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin-top: 24px;
+  }
+  .welcome-text{
+    font-size: 15px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .diamond-icon{
+    width: 30px; height: 30px;
+    color: var(--text-faint);
+  }
+
+  .content-title-wrap{
+    min-height: 130px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .content-title{
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #3a3d47;
+    max-width: 380px;
+  }
+  .content-title.filled{ color: var(--text); }
+
+  @keyframes fadeInUp{
+    from{ opacity: 0; transform: translateY(26px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+  .content-title.animate{
+    animation: fadeInUp 0.5s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  /* ---------- Marquee (right side) ---------- */
+  .hero-right{
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    padding: 20px 20px 20px 0;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+  }
+
+  .marquee-row{
+    display: flex;
+    gap: 14px;
+    width: max-content;
+  }
+  .marquee-row.row-a{ animation: scrollLeft 34s linear infinite; }
+  .marquee-row.row-b{ animation: scrollRight 22s linear infinite; }
+  .marquee-row.row-c{ animation: scrollLeft 46s linear infinite; }
+
+  @keyframes scrollLeft{
+    from{ transform: translateX(0); }
+    to{ transform: translateX(-50%); }
+  }
+  @keyframes scrollRight{
+    from{ transform: translateX(-50%); }
+    to{ transform: translateX(0); }
+  }
+
+  .tile{
+    width: 108px; height: 132px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .tile span{
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.92);
+    text-transform: uppercase;
+  }
+  .tile.dark{ background: #14151b; border-color: var(--border); }
+  .tile.dark span{ color: var(--text-faint); font-size: 10px; }
+  .tile.cyan{ background: linear-gradient(155deg, #3fd6ef, #0f8fac); }
+  .tile.blue{ background: linear-gradient(155deg, #5b93ff, #1e4fc9); }
+  .tile.pink{ background: linear-gradient(155deg, #ff6cc4, #b8168a); }
+  .tile.photo{ background: #1a1c23; border-color: var(--border); }
+  .tile-mark{
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.16);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile-mark svg{ width: 18px; height: 18px; color: white; }
+  .tile.photo .tile-mark{ background: rgba(255,255,255,0.06); }
+  .tile.photo .tile-mark svg{ color: var(--text-muted); }
+  .tile-chevron{
+    position: absolute;
+    top: 12px; left: 12px;
+    width: 18px; height: 18px;
+    color: rgba(255,255,255,0.35);
+  }
+  .tile.dark .tile-chevron{ color: var(--text-faint); }
+
+  /* ---------- Category / Content bar ---------- */
+  .meta-bar{
+    display: flex;
+    border-top: 1px solid var(--border);
+    margin-top: -1px;
+  }
+  .meta-bar .meta-cell{
+    flex: 1;
+    padding: 14px 24px;
+    font-size: 13px;
+    color: var(--text-faint);
+    border-right: 1px solid var(--border);
+  }
+  .meta-bar .meta-cell:last-child{ border-right: none; }
+
+  .hero-card-wrap{ position: relative; }
+
+  /* ---------- Footer ---------- */
+  .footer{
+    grid-area: footer;
+    text-align: center;
+    padding: 22px 32px 26px;
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px){
+    .app{ grid-template-columns: 1fr; grid-template-areas: "topbar" "brands" "main" "footer"; }
+    .sidebar{ display: none; }
+    .hero-card{ grid-template-columns: 1fr; }
+    .hero-right{ display: none; }
+    .search{ display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="breadcrumb">
+      <span>Dashboard</span>
+      <span class="sep">›</span>
+      <span class="crumb-muted" id="crumbSection">Overview</span>
+      <span class="sep">›</span>
+    </div>
+    <div class="topbar-right">
+      <label class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search...">
+        <kbd>/</kbd>
+      </label>
+      <button class="icon-btn" title="Bookmarks">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <button class="icon-btn" title="More">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+      </button>
+      <div class="avatar">e</div>
+    </div>
+  </header>
+
+  <!-- Brand tabs -->
+  <nav class="brands">
+    <div class="brand active">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg></div>
+      unity elites
+    </div>
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/></svg></div>
+      ue-commerce
+    </div>
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/></svg></div>
+      ue-movies
+    </div>
+    <div class="brands-more">···</div>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+
+    <div class="nav-group">
+      <button class="nav-item" data-section="overview" data-title="Overview">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+        <span class="nav-text">Dashboard</span>
+      </button>
+    </div>
+
+    <div class="nav-group" style="margin-top: 6px;">
+      <div class="nav-label">Other options</div>
+
+      <button class="nav-item" data-section="github" data-title="Our Github">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.21-3.37-1.21-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 2.5-.35c.85 0 1.71.12 2.5.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.95.68 1.92 0 1.39-.01 2.51-.01 2.85 0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg></span>
+        <span class="nav-text">Our Github</span>
+      </button>
+
+      <button class="nav-item" data-section="documentation" data-title="Documentation">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
+        <span class="nav-text">Documentation</span>
+      </button>
+
+      <button class="nav-item" data-section="updates" data-title="Updates">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 2v4M16 2v4"/></svg></span>
+        <span class="nav-text">Updates</span>
+      </button>
+
+      <button class="nav-item" data-section="help" data-title="Help">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg></span>
+        <span class="nav-text">Help</span>
+      </button>
+
+      <button class="nav-item" data-section="settings" data-title="Settings">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.03 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.03z"/></svg></span>
+        <span class="nav-text">Settings</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="hero-card-wrap">
+      <div class="hero-card">
+
+        <div class="hero-left">
+          <span class="awaiting-tag" id="awaitingTag">awaiting details...</span>
+
+          <div class="welcome-block">
+            <div class="welcome-text">Welcome to UE docs</div>
+            <svg class="diamond-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l10 10-10 10L2 12z"/></svg>
+          </div>
+
+          <div class="content-title-wrap">
+            <div class="content-title" id="contentTitle">Documentation<br>page for all UE<br>products</div>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="marquee-row row-a" id="rowA"></div>
+          <div class="marquee-row row-b" id="rowB"></div>
+          <div class="marquee-row row-c" id="rowC"></div>
+        </div>
+
+      </div>
+
+      <div class="meta-bar">
+        <div class="meta-cell">Category</div>
+        <div class="meta-cell">Content</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    Powered by UnityElites. © 2024–2026 Unity Elites. All rights reserved
+  </footer>
+
+</div>
+
+<script>
+  // ---------- Sidebar collapse ----------
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('sidebarToggle');
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+  });
+
+  // ---------- Sidebar item selection + fade-in-up content ----------
+  const navItems = document.querySelectorAll('.nav-item');
+  const contentTitle = document.getElementById('contentTitle');
+  const crumbSection = document.getElementById('crumbSection');
+  const awaitingTag = document.getElementById('awaitingTag');
+
+  const titles = {
+    overview: 'Documentation<br>page for all UE<br>products',
+    github: 'Our<br>Github',
+    documentation: 'Document<br>ation',
+    updates: 'Latest<br>Updates',
+    help: 'Help<br>Center',
+    settings: 'Settings'
+  };
+
+  function selectSection(item){
+    navItems.forEach(el => el.classList.remove('active'));
+    item.classList.add('active');
+
+    const section = item.dataset.section;
+    const title = item.dataset.title;
+
+    crumbSection.textContent = title;
+    awaitingTag.style.display = section === 'overview' ? 'inline-flex' : 'none';
+
+    // restart the fade-in-up animation
+    contentTitle.classList.remove('animate');
+    contentTitle.classList.add('filled');
+    // force reflow so the animation replays every click
+    void contentTitle.offsetWidth;
+    contentTitle.innerHTML = titles[section] || title;
+    contentTitle.classList.add('animate');
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => selectSection(item));
+  });
+  // Default selected state
+  navItems[0].classList.add('active');
+
+  // ---------- Marquee tiles ----------
+  const tileDefs = [
+    { cls: 'cyan', label: 'Unity Elites', icon: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/>' },
+    { cls: 'dark', label: '', icon: '<path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/>' },
+    { cls: 'photo', label: 'Photoshoot', icon: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13.5" r="3.2"/>' },
+    { cls: 'blue', label: 'UE Elites', icon: '<rect x="4" y="3" width="16" height="18" rx="2"/>' },
+    { cls: 'dark', label: '', icon: '<path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/>' },
+    { cls: 'pink', label: 'Unity Elites', icon: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/>' },
+  ];
+
+  function buildTile(def){
+    const tile = document.createElement('div');
+    tile.className = 'tile ' + def.cls;
+    tile.innerHTML = `
+      <svg class="tile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/></svg>
+      <div class="tile-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${def.icon}</svg></div>
+      ${def.label ? `<span>${def.label}</span>` : ''}
+    `;
+    return tile;
+  }
+
+  function fillRow(rowEl, order){
+    // duplicate the sequence so the loop is seamless
+    const seq = [...order, ...order];
+    seq.forEach(def => rowEl.appendChild(buildTile(def)));
+  }
+
+  fillRow(document.getElementById('rowA'), [tileDefs[0], tileDefs[1], tileDefs[2]]);
+  fillRow(document.getElementById('rowB'), [tileDefs[3], tileDefs[4], tileDefs[0]]);
+  fillRow(document.getElementById('rowC'), [tileDefs[5], tileDefs[2], tileDefs[3]]);
+</script>
+
+</body>
+</html>
