@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,21 +8,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --accent-cyan: #35c7e8;
+    --accent-blue: #3b7cf6;
+    --accent-pink: #ef3fa6;
+    --danger: #ef4444;
+  }
+
+  html[data-theme="dark"]{
     --bg: #0a0b0f;
     --panel: #111319;
     --panel-2: #15171f;
+    --panel-raised: #1a1c24;
     --border: #23262f;
     --border-soft: #1c1e26;
     --text: #f2f3f5;
     --text-muted: #8a8e99;
     --text-faint: #5b5f6a;
-    --accent-cyan: #35c7e8;
-    --accent-blue: #3b7cf6;
-    --accent-pink: #ef3fa6;
     --active-bg: #1a1d26;
-    --radius-lg: 18px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
+    --grid-line: rgba(255,255,255,0.025);
+    --shadow: 0 12px 32px rgba(0,0,0,0.45);
+    --overlay: rgba(6,7,10,0.6);
+    --hover-bg: rgba(255,255,255,0.045);
+  }
+
+  html[data-theme="light"]{
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --panel-2: #f8f9fb;
+    --panel-raised: #ffffff;
+    --border: #e3e5ea;
+    --border-soft: #e9ebef;
+    --text: #14161b;
+    --text-muted: #6b7078;
+    --text-faint: #9498a1;
+    --active-bg: #eef0f4;
+    --grid-line: rgba(20,22,27,0.035);
+    --shadow: 0 12px 32px rgba(20,22,27,0.12);
+    --overlay: rgba(20,22,27,0.32);
+    --hover-bg: rgba(20,22,27,0.04);
   }
 
   *{ box-sizing: border-box; }
@@ -34,6 +60,7 @@
     color: var(--text);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -42,6 +69,7 @@
 
   a{ color: inherit; text-decoration: none; }
   button{ font-family: inherit; cursor: pointer; }
+  ul{ list-style: none; margin: 0; padding: 0; }
 
   .app{
     display: grid;
@@ -61,9 +89,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 22px 32px 14px;
-    gap: 24px;
+    padding: clamp(14px, 3vw, 22px) clamp(14px, 4vw, 32px) 14px;
+    gap: clamp(10px, 2vw, 24px);
   }
+
+  .topbar-left{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .menu-btn{ display: none; flex-shrink: 0; }
 
   .breadcrumb{
     display: flex;
@@ -72,9 +109,12 @@
     font-size: 15px;
     color: var(--text);
     font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
   }
-  .breadcrumb .sep{ color: var(--text-faint); font-size: 13px; }
-  .breadcrumb .crumb-muted{ color: var(--text-muted); }
+  .breadcrumb .sep{ color: var(--text-faint); font-size: 13px; flex-shrink: 0; }
+  .breadcrumb .crumb-muted{ color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; }
 
   .topbar-right{
     display: flex;
@@ -82,7 +122,7 @@
     gap: 14px;
   }
 
-  .search{
+  .search-trigger{
     display: flex;
     align-items: center;
     gap: 10px;
@@ -91,19 +131,13 @@
     border-radius: 10px;
     padding: 9px 14px;
     width: 260px;
-    color: var(--text-muted);
-  }
-  .search input{
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
+    color: var(--text-faint);
     font-size: 14px;
-    width: 100%;
-    font-family: inherit;
+    text-align: left;
   }
-  .search input::placeholder{ color: var(--text-faint); }
-  .search kbd{
+  .search-trigger:hover{ border-color: var(--accent-cyan); color: var(--text-muted); }
+  .search-trigger span.placeholder{ flex: 1; }
+  .search-trigger kbd{
     font-size: 11px;
     color: var(--text-faint);
     border: 1px solid var(--border);
@@ -119,28 +153,49 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--text-muted);
     flex-shrink: 0;
+    position: relative;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   }
-  .icon-btn:hover{ color: var(--text); border-color: #33363f; }
+  .icon-btn:hover, .icon-btn.open{ color: var(--text); border-color: var(--accent-cyan); }
+  .icon-btn svg{ width: 16px; height: 16px; }
+  .icon-btn .dot{
+    position: absolute;
+    top: 7px; right: 7px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent-pink);
+    border: 2px solid var(--panel);
+  }
 
-  .avatar{
+  .avatar-btn{
     width: 38px; height: 38px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-pink));
     display: flex; align-items: center; justify-content: center;
     font-weight: 700;
     font-size: 14px;
+    color: white;
     flex-shrink: 0;
+    border: 2px solid transparent;
   }
+  .avatar-btn.open{ border-color: var(--accent-cyan); }
+
+  .anchor{ position: relative; }
 
   /* ---------- Brand tabs row ---------- */
   .brands{
     grid-area: brands;
     display: flex;
     align-items: center;
-    gap: 36px;
-    padding: 6px 32px 22px;
+    gap: clamp(18px, 4vw, 36px);
+    padding: 6px clamp(14px, 4vw, 32px) 22px;
     border-bottom: 1px solid var(--border-soft);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .brands::-webkit-scrollbar{ display: none; }
+  .brand{ flex-shrink: 0; }
   .brand{
     display: flex;
     align-items: center;
@@ -150,6 +205,8 @@
     font-weight: 500;
     padding-bottom: 4px;
     border-bottom: 2px solid transparent;
+    background: transparent;
+    border-left: none; border-right: none; border-top: none;
   }
   .brand-mark{
     width: 26px; height: 26px;
@@ -158,17 +215,22 @@
     flex-shrink: 0;
   }
   .brand-mark svg{ width: 15px; height: 15px; }
-  .brand.active{ color: var(--text); }
-  .brand:nth-child(1) .brand-mark{ background: radial-gradient(circle at 30% 30%, #4fd8f0, #1a94b3); }
-  .brand:nth-child(2) .brand-mark{ background: radial-gradient(circle at 30% 30%, #5b93ff, #2451c9); }
-  .brand:nth-child(3) .brand-mark{ background: radial-gradient(circle at 30% 30%, #ff6cc4, #c11a80); }
+  .brand.active{ color: var(--text); border-bottom-color: var(--accent-cyan); }
+  .brand[data-brand="unity-elites"] .brand-mark{ background: radial-gradient(circle at 30% 30%, #4fd8f0, #1a94b3); }
+  .brand[data-brand="ue-commerce"] .brand-mark{ background: radial-gradient(circle at 30% 30%, #5b93ff, #2451c9); }
+  .brand[data-brand="ue-movies"] .brand-mark{ background: radial-gradient(circle at 30% 30%, #ff6cc4, #c11a80); }
 
   .brands-more{
     margin-left: auto;
     color: var(--text-faint);
     font-size: 18px;
     letter-spacing: 2px;
+    background: transparent;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 8px;
   }
+  .brands-more:hover{ background: var(--hover-bg); color: var(--text); }
 
   /* ---------- Sidebar ---------- */
   .sidebar{
@@ -198,6 +260,29 @@
   .sidebar-toggle svg{ width: 13px; height: 13px; transition: transform 0.28s ease; }
   .sidebar.collapsed .sidebar-toggle svg{ transform: rotate(180deg); }
 
+  .sidebar-close-mobile{
+    display: none;
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    align-items: center; justify-content: center;
+    color: var(--text-muted);
+    margin: 0 0 14px auto;
+  }
+  .sidebar-close-mobile svg{ width: 15px; height: 15px; }
+
+  .sidebar-scrim{
+    position: fixed;
+    inset: 0;
+    background: var(--overlay);
+    z-index: 140;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+  .sidebar-scrim.open{ opacity: 1; pointer-events: auto; }
+
   .nav-group{ margin-bottom: 22px; }
   .nav-label{
     font-size: 11px;
@@ -225,8 +310,9 @@
     border: 1px solid transparent;
     white-space: nowrap;
     overflow: hidden;
+    width: 100%;
   }
-  .nav-item:hover{ color: var(--text); background: var(--panel); }
+  .nav-item:hover{ color: var(--text); background: var(--hover-bg); }
   .nav-item.active{
     color: var(--text);
     background: var(--active-bg);
@@ -238,29 +324,23 @@
     display: flex; align-items: center; justify-content: center;
   }
   .nav-item .nav-icon svg{ width: 18px; height: 18px; }
-  .nav-item .nav-text{
-    transition: opacity 0.15s ease;
-  }
   .sidebar.collapsed .nav-item{ justify-content: center; }
   .sidebar.collapsed .nav-item .nav-text{ display: none; }
-  .sidebar.collapsed .nav-group{ display: flex; flex-direction: column; }
 
   /* ---------- Main content ---------- */
   .main{
     grid-area: main;
-    padding: 22px 32px 0;
+    padding: 22px clamp(14px, 4vw, 32px) 0;
   }
 
   .hero-card{
     position: relative;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
-    background:
-      radial-gradient(ellipse at 15% 20%, rgba(53,199,232,0.06), transparent 45%),
-      var(--panel);
+    background: var(--panel);
     background-image:
-      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
       radial-gradient(ellipse at 15% 20%, rgba(53,199,232,0.07), transparent 45%);
     background-size: 28px 28px, 28px 28px, 100% 100%;
     display: grid;
@@ -270,11 +350,12 @@
   }
 
   .hero-left{
-    padding: 26px 0 34px 34px;
+    padding: clamp(18px, 3vw, 26px) clamp(16px, 3vw, 24px) clamp(20px, 4vw, 34px) clamp(18px, 4vw, 34px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
+    min-width: 0;
   }
 
   .awaiting-tag{
@@ -282,7 +363,7 @@
     width: fit-content;
     font-size: 12px;
     color: var(--text-faint);
-    background: rgba(255,255,255,0.03);
+    background: var(--hover-bg);
     border: 1px solid var(--border);
     padding: 5px 12px;
     border-radius: 20px;
@@ -311,11 +392,11 @@
     align-items: flex-end;
   }
   .content-title{
-    font-size: 46px;
+    font-size: clamp(28px, 5vw, 46px);
     font-weight: 700;
     line-height: 1.05;
     letter-spacing: -0.02em;
-    color: #3a3d47;
+    color: var(--text-faint);
     max-width: 380px;
   }
   .content-title.filled{ color: var(--text); }
@@ -341,23 +422,13 @@
     mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
   }
 
-  .marquee-row{
-    display: flex;
-    gap: 14px;
-    width: max-content;
-  }
+  .marquee-row{ display: flex; gap: 14px; width: max-content; }
   .marquee-row.row-a{ animation: scrollLeft 34s linear infinite; }
   .marquee-row.row-b{ animation: scrollRight 22s linear infinite; }
   .marquee-row.row-c{ animation: scrollLeft 46s linear infinite; }
 
-  @keyframes scrollLeft{
-    from{ transform: translateX(0); }
-    to{ transform: translateX(-50%); }
-  }
-  @keyframes scrollRight{
-    from{ transform: translateX(-50%); }
-    to{ transform: translateX(0); }
-  }
+  @keyframes scrollLeft{ from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
+  @keyframes scrollRight{ from{ transform: translateX(-50%); } to{ transform: translateX(0); } }
 
   .tile{
     width: 108px; height: 132px;
@@ -379,12 +450,12 @@
     color: rgba(255,255,255,0.92);
     text-transform: uppercase;
   }
-  .tile.dark{ background: #14151b; border-color: var(--border); }
+  .tile.dark{ background: var(--panel-2); border-color: var(--border); }
   .tile.dark span{ color: var(--text-faint); font-size: 10px; }
   .tile.cyan{ background: linear-gradient(155deg, #3fd6ef, #0f8fac); }
   .tile.blue{ background: linear-gradient(155deg, #5b93ff, #1e4fc9); }
   .tile.pink{ background: linear-gradient(155deg, #ff6cc4, #b8168a); }
-  .tile.photo{ background: #1a1c23; border-color: var(--border); }
+  .tile.photo{ background: var(--panel-raised); border-color: var(--border); }
   .tile-mark{
     width: 34px; height: 34px;
     border-radius: 9px;
@@ -392,22 +463,17 @@
     display: flex; align-items: center; justify-content: center;
   }
   .tile-mark svg{ width: 18px; height: 18px; color: white; }
-  .tile.photo .tile-mark{ background: rgba(255,255,255,0.06); }
+  .tile.photo .tile-mark{ background: var(--hover-bg); }
   .tile.photo .tile-mark svg{ color: var(--text-muted); }
   .tile-chevron{
-    position: absolute;
-    top: 12px; left: 12px;
+    position: absolute; top: 12px; left: 12px;
     width: 18px; height: 18px;
     color: rgba(255,255,255,0.35);
   }
   .tile.dark .tile-chevron{ color: var(--text-faint); }
 
   /* ---------- Category / Content bar ---------- */
-  .meta-bar{
-    display: flex;
-    border-top: 1px solid var(--border);
-    margin-top: -1px;
-  }
+  .meta-bar{ display: flex; border-top: 1px solid var(--border); margin-top: -1px; }
   .meta-bar .meta-cell{
     flex: 1;
     padding: 14px 24px;
@@ -428,13 +494,292 @@
     color: var(--text-faint);
   }
 
+  /* ================= Dropdowns ================= */
+  .dropdown{
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 280px;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    padding: 8px;
+    z-index: 60;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.14s ease, transform 0.14s ease;
+  }
+  .dropdown.open{ opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .dropdown.left{ right: auto; left: 0; }
+
+  .dropdown-header{
+    padding: 10px 10px 8px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 6px;
+  }
+  .dropdown-header .name{ font-size: 14px; font-weight: 600; color: var(--text); }
+  .dropdown-header .email{ font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+
+  .dd-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 13.5px;
+    font-weight: 500;
+    text-align: left;
+  }
+  .dd-item:hover{ background: var(--hover-bg); }
+  .dd-item svg{ width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+  .dd-item.danger{ color: var(--danger); }
+  .dd-item.danger svg{ color: var(--danger); }
+  .dd-item .trailing{ margin-left: auto; font-size: 11px; color: var(--text-faint); }
+  .dd-item .remove-x{
+    margin-left: auto;
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint);
+  }
+  .dd-item .remove-x:hover{ background: var(--border-soft); color: var(--text); }
+  .dd-divider{ height: 1px; background: var(--border-soft); margin: 6px 4px; }
+  .dd-empty{ padding: 16px 10px; text-align: center; color: var(--text-faint); font-size: 13px; }
+
+  .theme-row{
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    background: var(--panel-2);
+    border-radius: 10px;
+    margin: 4px 4px 8px;
+  }
+  .theme-opt{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+  .theme-opt svg{ width: 16px; height: 16px; }
+  .theme-opt.active{ background: var(--panel-raised); border-color: var(--border); color: var(--text); }
+
+  /* ================= Modal / Command palette ================= */
+  .modal-backdrop{
+    position: fixed; inset: 0;
+    background: var(--overlay);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 12vh;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .modal-backdrop.open{ opacity: 1; pointer-events: auto; }
+
+  .cmd-modal{
+    width: min(560px, 92vw);
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transform: translateY(-10px);
+    transition: transform 0.15s ease;
+  }
+  .modal-backdrop.open .cmd-modal{ transform: translateY(0); }
+
+  .cmd-input-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .cmd-input-row svg{ width: 17px; height: 17px; color: var(--text-faint); flex-shrink: 0; }
+  .cmd-input-row input{
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  .cmd-input-row input::placeholder{ color: var(--text-faint); }
+  .cmd-input-row kbd{
+    font-size: 11px; color: var(--text-faint);
+    border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px;
+  }
+
+  .cmd-list{ max-height: 320px; overflow-y: auto; padding: 8px; }
+  .cmd-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+  }
+  .cmd-item .cmd-icon{
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--panel-2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cmd-item .cmd-icon svg{ width: 15px; height: 15px; color: var(--text-muted); }
+  .cmd-item .cmd-hint{ margin-left: auto; font-size: 11.5px; color: var(--text-faint); }
+  .cmd-item:hover, .cmd-item.highlighted{ background: var(--hover-bg); }
+  .cmd-item.highlighted{ outline: 1px solid var(--border); }
+  .cmd-section-label{
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-faint); padding: 10px 10px 6px;
+  }
+
+  /* ================= Shortcuts modal ================= */
+  .shortcuts-list{ padding: 6px 16px 18px; }
+  .shortcut-row{
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  .shortcut-row:last-child{ border-bottom: none; }
+  .shortcut-row kbd{
+    font-size: 11.5px; color: var(--text);
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 5px; padding: 3px 8px; margin-left: 6px;
+  }
+
+  /* ================= Toasts ================= */
+  .toast-stack{
+    position: fixed;
+    bottom: 22px; right: 22px;
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 200;
+  }
+  .toast{
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 13.5px;
+    color: var(--text);
+    min-width: 220px;
+    animation: toastIn 0.22s cubic-bezier(.22,1,.36,1) both;
+  }
+  .toast svg{ width: 16px; height: 16px; color: var(--accent-cyan); flex-shrink: 0; }
+  .toast.leaving{ animation: toastOut 0.18s ease both; }
+  @keyframes toastIn{ from{ opacity:0; transform: translateY(8px) scale(0.97); } to{ opacity:1; transform: translateY(0) scale(1); } }
+  @keyframes toastOut{ to{ opacity:0; transform: translateY(8px) scale(0.97); } }
+
   /* ---------- Responsive ---------- */
+
+  /* Tablet: sidebar becomes an off-canvas drawer, hamburger appears */
   @media (max-width: 900px){
     .app{ grid-template-columns: 1fr; grid-template-areas: "topbar" "brands" "main" "footer"; }
-    .sidebar{ display: none; }
+
+    .menu-btn{ display: flex; }
+
+    .sidebar{
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: min(280px, 82vw);
+      z-index: 150;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transform: translateX(-100%);
+      overflow-y: auto;
+    }
+    .sidebar.mobile-open{ transform: translateX(0); }
+    /* the desktop collapsed state doesn't apply once we're in drawer mode */
+    .sidebar.collapsed{ width: min(280px, 82vw); }
+    .sidebar.collapsed .nav-label{ opacity: 1; }
+    .sidebar.collapsed .nav-item{ justify-content: flex-start; }
+    .sidebar.collapsed .nav-item .nav-text{ display: inline; }
+
+    .sidebar-toggle{ display: none; }
+    .sidebar-close-mobile{ display: flex; }
+
     .hero-card{ grid-template-columns: 1fr; }
+    .hero-card{ min-height: 0; }
     .hero-right{ display: none; }
-    .search{ display: none; }
+  }
+
+  /* Small tablet / large phone */
+  @media (max-width: 640px){
+    .search-trigger{ width: 40px; height: 38px; padding: 0; justify-content: center; }
+    .search-trigger span.placeholder, .search-trigger kbd{ display: none; }
+
+    .topbar-right{ gap: 8px; }
+    .icon-btn, .avatar-btn{ width: 36px; height: 36px; }
+
+    .breadcrumb .sep:last-child{ display: none; }
+
+    .welcome-block{ margin-top: 16px; gap: 12px; }
+    .content-title-wrap{ min-height: 0; margin-top: 10px; }
+    .awaiting-tag{ font-size: 11px; }
+
+    .meta-bar .meta-cell{ padding: 12px 16px; font-size: 12.5px; }
+
+    .modal-backdrop{ padding-top: max(8vh, 20px); padding-left: 12px; padding-right: 12px; }
+    .cmd-modal{ width: 100%; }
+    .cmd-input-row input{ font-size: 16px; } /* prevents iOS auto-zoom on focus */
+  }
+
+  /* Phones: dropdowns become a fixed, edge-anchored sheet instead of
+     risking overflow off an anchor near the screen edge */
+  @media (max-width: 480px){
+    .dropdown, .dropdown.left{
+      position: fixed;
+      top: auto;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      width: auto;
+      max-height: 70vh;
+      overflow-y: auto;
+      transform: translateY(14px) scale(0.99);
+    }
+    .dropdown.open{ transform: translateY(0) scale(1); }
+
+    .toast-stack{ left: 12px; right: 12px; bottom: 12px; }
+    .toast{ min-width: 0; width: 100%; }
+
+    .brand{ font-size: 13px; }
+    .brand-mark{ width: 22px; height: 22px; }
+  }
+
+  /* visible keyboard focus */
+  button:focus-visible, input:focus-visible, .nav-item:focus-visible{
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 2px;
   }
 </style>
 </head>
@@ -444,49 +789,143 @@
 
   <!-- Top bar -->
   <header class="topbar">
-    <div class="breadcrumb">
-      <span>Dashboard</span>
-      <span class="sep">›</span>
-      <span class="crumb-muted" id="crumbSection">Overview</span>
-      <span class="sep">›</span>
+    <div class="topbar-left">
+      <button class="icon-btn menu-btn" id="menuBtn" title="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="breadcrumb">
+        <span>Dashboard</span>
+        <span class="sep">›</span>
+        <span class="crumb-muted" id="crumbSection">Overview</span>
+        <span class="sep">›</span>
+      </div>
     </div>
     <div class="topbar-right">
-      <label class="search">
+      <button class="search-trigger" id="searchTrigger">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" placeholder="Search...">
+        <span class="placeholder">Search...</span>
         <kbd>/</kbd>
-      </label>
-      <button class="icon-btn" title="Bookmarks">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
       </button>
-      <button class="icon-btn" title="More">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+
+      <div class="anchor">
+        <button class="icon-btn" id="bookmarksBtn" title="Bookmarks" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <div class="dropdown" id="bookmarksMenu">
+          <div class="dropdown-header"><div class="name">Bookmarks</div></div>
+          <ul id="bookmarksList"></ul>
+        </div>
+      </div>
+
+      <div class="anchor">
+        <button class="icon-btn" id="moreBtn" title="More" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+          <span class="dot"></span>
+        </button>
+        <div class="dropdown" id="moreMenu">
+          <button class="dd-item" data-action="whats-new">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.9 6.3 6.9.9-5 4.8 1.3 6.8L12 17.6 5.9 20.8l1.3-6.8-5-4.8 6.9-.9z"/></svg>
+            What's new
+            <span class="trailing">●</span>
+          </button>
+          <button class="dd-item" data-action="shortcuts">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
+            Keyboard shortcuts
+            <span class="trailing">?</span>
+          </button>
+          <button class="dd-item" data-action="toggle-theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            Toggle theme
+          </button>
+          <div class="dd-divider"></div>
+          <button class="dd-item" data-action="report-issue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            Report an issue
+          </button>
+        </div>
+      </div>
+
+      <button class="icon-btn" id="themeToggle" title="Toggle theme">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
       </button>
-      <div class="avatar">e</div>
+
+      <div class="anchor">
+        <button class="avatar-btn" id="avatarBtn" title="Account" aria-haspopup="true">e</button>
+        <div class="dropdown" id="profileMenu">
+          <div class="dropdown-header">
+            <div class="name">Eli Nakamura</div>
+            <div class="email">eli@unityelites.com</div>
+          </div>
+
+          <div class="theme-row" id="profileThemeRow">
+            <button class="theme-opt" data-theme-choice="light">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+              Light
+            </button>
+            <button class="theme-opt" data-theme-choice="dark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+              Dark
+            </button>
+          </div>
+
+          <button class="dd-item" data-action="profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
+            View profile
+          </button>
+          <button class="dd-item" data-action="preferences">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.03 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.03z"/></svg>
+            Preferences
+          </button>
+          <div class="dd-divider"></div>
+          <button class="dd-item danger" data-action="sign-out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
   <!-- Brand tabs -->
   <nav class="brands">
-    <div class="brand active">
+    <button class="brand active" data-brand="unity-elites">
       <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg></div>
       unity elites
-    </div>
-    <div class="brand">
+    </button>
+    <button class="brand" data-brand="ue-commerce">
       <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/></svg></div>
       ue-commerce
-    </div>
-    <div class="brand">
+    </button>
+    <button class="brand" data-brand="ue-movies">
       <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/></svg></div>
       ue-movies
+    </button>
+    <div class="anchor" style="margin-left:auto;">
+      <button class="brands-more" id="brandMoreBtn" aria-haspopup="true">···</button>
+      <div class="dropdown left" id="brandMoreMenu" style="width: 220px;">
+        <button class="dd-item" data-action="add-workspace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Add workspace
+        </button>
+        <button class="dd-item" data-action="manage-workspaces">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Manage workspaces
+        </button>
+      </div>
     </div>
-    <div class="brands-more">···</div>
   </nav>
+
+  <!-- Sidebar scrim (mobile off-canvas backdrop) -->
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <button class="sidebar-close-mobile" id="sidebarCloseMobile" title="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
 
     <div class="nav-group">
@@ -565,55 +1004,401 @@
 
 </div>
 
+<!-- Command palette / search -->
+<div class="modal-backdrop" id="searchBackdrop">
+  <div class="cmd-modal">
+    <div class="cmd-input-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="cmdInput" placeholder="Search sections, actions, workspaces..." autocomplete="off">
+      <kbd>esc</kbd>
+    </div>
+    <div class="cmd-list" id="cmdList"></div>
+  </div>
+</div>
+
+<!-- Keyboard shortcuts modal -->
+<div class="modal-backdrop" id="shortcutsBackdrop">
+  <div class="cmd-modal">
+    <div class="cmd-input-row" style="border-bottom: 1px solid var(--border-soft);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
+      <div style="flex:1; font-size:15px; font-weight:600;">Keyboard shortcuts</div>
+      <kbd>esc</kbd>
+    </div>
+    <div class="shortcuts-list">
+      <div class="shortcut-row">Open search <kbd>/</kbd></div>
+      <div class="shortcut-row">Toggle theme <kbd>t</kbd></div>
+      <div class="shortcut-row">Collapse sidebar <kbd>[</kbd></div>
+      <div class="shortcut-row">Show shortcuts <kbd>?</kbd></div>
+      <div class="shortcut-row">Close any dialog <kbd>esc</kbd></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
 <script>
-  // ---------- Sidebar collapse ----------
-  const sidebar = document.getElementById('sidebar');
-  const toggle = document.getElementById('sidebarToggle');
-  toggle.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
+  /* ================= Utilities ================= */
+  function svgCheck(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'; }
+
+  function showToast(message, iconSvg){
+    const stack = document.getElementById('toastStack');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = (iconSvg || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>') + `<span>${message}</span>`;
+    stack.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('leaving');
+      setTimeout(() => toast.remove(), 200);
+    }, 2600);
+  }
+
+  /* ================= Theme ================= */
+  const root = document.documentElement;
+  const themeToggleBtn = document.getElementById('themeToggle');
+  const sunIcon = document.getElementById('themeIconSun');
+  const moonIcon = document.getElementById('themeIconMoon');
+  const profileThemeRow = document.getElementById('profileThemeRow');
+
+  function applyTheme(theme){
+    root.setAttribute('data-theme', theme);
+    sunIcon.style.display = theme === 'dark' ? 'block' : 'none';
+    moonIcon.style.display = theme === 'light' ? 'block' : 'none';
+    profileThemeRow.querySelectorAll('.theme-opt').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.themeChoice === theme);
+    });
+  }
+
+  function toggleTheme(){
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    showToast(next === 'light' ? 'Switched to light mode' : 'Switched to dark mode',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>');
+  }
+
+  // Respect system preference on first load
+  applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+
+  themeToggleBtn.addEventListener('click', toggleTheme);
+  profileThemeRow.querySelectorAll('.theme-opt').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      applyTheme(btn.dataset.themeChoice);
+    });
   });
 
-  // ---------- Sidebar item selection + fade-in-up content ----------
+  /* ================= Dropdown manager ================= */
+  const dropdowns = [
+    { trigger: document.getElementById('bookmarksBtn'), menu: document.getElementById('bookmarksMenu') },
+    { trigger: document.getElementById('moreBtn'), menu: document.getElementById('moreMenu') },
+    { trigger: document.getElementById('avatarBtn'), menu: document.getElementById('profileMenu') },
+    { trigger: document.getElementById('brandMoreBtn'), menu: document.getElementById('brandMoreMenu') },
+  ];
+
+  function closeAllDropdowns(){
+    dropdowns.forEach(d => { d.menu.classList.remove('open'); d.trigger.classList.remove('open'); });
+  }
+
+  dropdowns.forEach(d => {
+    d.trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = !d.menu.classList.contains('open');
+      closeAllDropdowns();
+      if (willOpen){ d.menu.classList.add('open'); d.trigger.classList.add('open'); }
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    const insideAny = dropdowns.some(d => d.menu.contains(e.target) || d.trigger.contains(e.target));
+    if (!insideAny) closeAllDropdowns();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllDropdowns();
+  });
+
+  /* ================= Sidebar collapse (desktop) ================= */
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+  /* ================= Sidebar drawer (mobile/tablet) ================= */
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebarScrim = document.getElementById('sidebarScrim');
+  const sidebarCloseMobile = document.getElementById('sidebarCloseMobile');
+
+  function openSidebarDrawer(){
+    sidebar.classList.add('mobile-open');
+    sidebarScrim.classList.add('open');
+  }
+  function closeSidebarDrawer(){
+    sidebar.classList.remove('mobile-open');
+    sidebarScrim.classList.remove('open');
+  }
+
+  menuBtn.addEventListener('click', openSidebarDrawer);
+  sidebarScrim.addEventListener('click', closeSidebarDrawer);
+  sidebarCloseMobile.addEventListener('click', closeSidebarDrawer);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebarDrawer();
+  });
+  // If the viewport grows past the drawer breakpoint, drop the mobile-open
+  // state so it doesn't linger and fight the desktop layout.
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) closeSidebarDrawer();
+  });
+
+  /* ================= Section navigation ================= */
   const navItems = document.querySelectorAll('.nav-item');
   const contentTitle = document.getElementById('contentTitle');
   const crumbSection = document.getElementById('crumbSection');
   const awaitingTag = document.getElementById('awaitingTag');
 
-  const titles = {
-    overview: 'Documentation<br>page for all UE<br>products',
-    github: 'Our<br>Github',
-    documentation: 'Document<br>ation',
-    updates: 'Latest<br>Updates',
-    help: 'Help<br>Center',
-    settings: 'Settings'
+  const sections = {
+    overview:      { title: 'Overview',      html: 'Documentation<br>page for all UE<br>products' },
+    github:        { title: 'Our Github',    html: 'Our<br>Github' },
+    documentation: { title: 'Documentation', html: 'Document<br>ation' },
+    updates:       { title: 'Updates',       html: 'Latest<br>Updates' },
+    help:          { title: 'Help',          html: 'Help<br>Center' },
+    settings:      { title: 'Settings',      html: 'Settings' },
   };
 
-  function selectSection(item){
+  function activateSection(key){
+    const item = document.querySelector(`.nav-item[data-section="${key}"]`);
+    if (!item) return;
     navItems.forEach(el => el.classList.remove('active'));
     item.classList.add('active');
 
-    const section = item.dataset.section;
-    const title = item.dataset.title;
+    const s = sections[key];
+    crumbSection.textContent = s.title;
+    awaitingTag.style.display = key === 'overview' ? 'inline-flex' : 'none';
 
-    crumbSection.textContent = title;
-    awaitingTag.style.display = section === 'overview' ? 'inline-flex' : 'none';
-
-    // restart the fade-in-up animation
     contentTitle.classList.remove('animate');
     contentTitle.classList.add('filled');
-    // force reflow so the animation replays every click
-    void contentTitle.offsetWidth;
-    contentTitle.innerHTML = titles[section] || title;
+    void contentTitle.offsetWidth; // restart animation
+    contentTitle.innerHTML = s.html;
     contentTitle.classList.add('animate');
   }
 
   navItems.forEach(item => {
-    item.addEventListener('click', () => selectSection(item));
+    item.addEventListener('click', () => {
+      activateSection(item.dataset.section);
+      closeSidebarDrawer();
+    });
   });
-  // Default selected state
-  navItems[0].classList.add('active');
+  activateSection('overview');
 
-  // ---------- Marquee tiles ----------
+  /* ================= Brand switching ================= */
+  const brandBtns = document.querySelectorAll('.brand');
+  function setActiveBrand(name){
+    brandBtns.forEach(b => b.classList.toggle('active', b.dataset.brand === name));
+    const label = document.querySelector(`.brand[data-brand="${name}"]`).textContent.trim();
+    showToast(`Switched workspace to ${label}`,
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/></svg>');
+  }
+  brandBtns.forEach(btn => btn.addEventListener('click', () => setActiveBrand(btn.dataset.brand)));
+
+  /* ================= Bookmarks (functional, in-memory) ================= */
+  let bookmarks = [
+    { key: 'documentation', label: 'Documentation' },
+    { key: 'github', label: 'Our Github' },
+  ];
+
+  function renderBookmarks(){
+    const list = document.getElementById('bookmarksList');
+    list.innerHTML = '';
+    if (bookmarks.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'dd-empty';
+      empty.textContent = 'No bookmarks yet';
+      list.appendChild(empty);
+      return;
+    }
+    bookmarks.forEach(bm => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <button class="dd-item" data-goto="${bm.key}">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          ${bm.label}
+          <span class="remove-x" data-remove="${bm.key}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </span>
+        </button>`;
+      list.appendChild(li);
+    });
+
+    list.querySelectorAll('[data-goto]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (e.target.closest('[data-remove]')) return;
+        activateSection(btn.dataset.goto);
+        closeAllDropdowns();
+      });
+    });
+    list.querySelectorAll('[data-remove]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        bookmarks = bookmarks.filter(b => b.key !== el.dataset.remove);
+        renderBookmarks();
+        showToast('Removed from bookmarks');
+      });
+    });
+  }
+  renderBookmarks();
+
+  /* ================= More menu + Profile menu actions ================= */
+  document.getElementById('moreMenu').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    closeAllDropdowns();
+    switch(btn.dataset.action){
+      case 'toggle-theme': toggleTheme(); break;
+      case 'shortcuts': openModal('shortcutsBackdrop'); break;
+      case 'whats-new': showToast("You're all caught up — no new updates"); break;
+      case 'report-issue': showToast('Thanks — issue reporting form would open here'); break;
+    }
+  });
+
+  document.getElementById('profileMenu').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    closeAllDropdowns();
+    switch(btn.dataset.action){
+      case 'profile': showToast('Opening profile page…'); break;
+      case 'preferences': showToast('Opening preferences…'); break;
+      case 'sign-out': showToast('Signed out'); break;
+    }
+  });
+
+  document.getElementById('brandMoreMenu').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    closeAllDropdowns();
+    switch(btn.dataset.action){
+      case 'add-workspace': showToast('Add workspace form would open here'); break;
+      case 'manage-workspaces': showToast('Opening workspace manager…'); break;
+    }
+  });
+
+  /* ================= Modals (search + shortcuts) ================= */
+  function openModal(id){
+    closeAllDropdowns();
+    document.getElementById(id).classList.add('open');
+    if (id === 'searchBackdrop'){
+      const input = document.getElementById('cmdInput');
+      input.value = '';
+      renderCmdResults('');
+      setTimeout(() => input.focus(), 10);
+    }
+  }
+  function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+  function closeAllModals(){ ['searchBackdrop','shortcutsBackdrop'].forEach(closeModal); }
+
+  document.getElementById('searchTrigger').addEventListener('click', () => openModal('searchBackdrop'));
+
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeAllModals(); });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const typing = ['INPUT','TEXTAREA'].includes(document.activeElement.tagName);
+    if (e.key === 'Escape') closeAllModals();
+    if (e.key === '/' && !typing){ e.preventDefault(); openModal('searchBackdrop'); }
+    if (e.key === '?' && !typing){ e.preventDefault(); openModal('shortcutsBackdrop'); }
+    if (e.key.toLowerCase() === 't' && !typing){ toggleTheme(); }
+    if (e.key === '[' && !typing){ sidebar.classList.toggle('collapsed'); }
+  });
+
+  /* ---- Command palette data + filtering ---- */
+  const commands = [
+    { label: 'Dashboard / Overview', group: 'Sections', action: () => activateSection('overview'),
+      icon: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>' },
+    { label: 'Our Github', group: 'Sections', action: () => activateSection('github'),
+      icon: '<path d="M12 2L2 7l10 5 10-5-10-5z"/>' },
+    { label: 'Documentation', group: 'Sections', action: () => activateSection('documentation'),
+      icon: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/>' },
+    { label: 'Updates', group: 'Sections', action: () => activateSection('updates'),
+      icon: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/>' },
+    { label: 'Help', group: 'Sections', action: () => activateSection('help'),
+      icon: '<circle cx="12" cy="12" r="9"/>' },
+    { label: 'Settings', group: 'Sections', action: () => activateSection('settings'),
+      icon: '<circle cx="12" cy="12" r="3"/>' },
+    { label: 'Switch to unity elites', group: 'Workspaces', action: () => setActiveBrand('unity-elites'),
+      icon: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/>' },
+    { label: 'Switch to ue-commerce', group: 'Workspaces', action: () => setActiveBrand('ue-commerce'),
+      icon: '<rect x="4" y="3" width="16" height="18" rx="2"/>' },
+    { label: 'Switch to ue-movies', group: 'Workspaces', action: () => setActiveBrand('ue-movies'),
+      icon: '<path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/>' },
+    { label: 'Toggle theme', group: 'Actions', hint: 't', action: () => toggleTheme(),
+      icon: '<circle cx="12" cy="12" r="4"/>' },
+    { label: 'Collapse sidebar', group: 'Actions', hint: '[', action: () => sidebar.classList.toggle('collapsed'),
+      icon: '<path d="M15 6l-6 6 6 6"/>' },
+    { label: 'Keyboard shortcuts', group: 'Actions', hint: '?', action: () => { closeAllModals(); openModal('shortcutsBackdrop'); },
+      icon: '<rect x="2" y="6" width="20" height="12" rx="2"/>' },
+  ];
+
+  let cmdHighlight = 0;
+
+  function renderCmdResults(query){
+    const list = document.getElementById('cmdList');
+    const q = query.trim().toLowerCase();
+    const filtered = q ? commands.filter(c => c.label.toLowerCase().includes(q)) : commands;
+
+    list.innerHTML = '';
+    cmdHighlight = 0;
+
+    if (filtered.length === 0){
+      list.innerHTML = '<div class="dd-empty">No results for "' + q + '"</div>';
+      return;
+    }
+
+    let lastGroup = null;
+    filtered.forEach((cmd, i) => {
+      if (cmd.group !== lastGroup){
+        const label = document.createElement('div');
+        label.className = 'cmd-section-label';
+        label.textContent = cmd.group;
+        list.appendChild(label);
+        lastGroup = cmd.group;
+      }
+      const btn = document.createElement('button');
+      btn.className = 'cmd-item' + (i === 0 ? ' highlighted' : '');
+      btn.dataset.index = i;
+      btn.innerHTML = `
+        <span class="cmd-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${cmd.icon}</svg></span>
+        <span>${cmd.label}</span>
+        ${cmd.hint ? `<span class="cmd-hint">${cmd.hint}</span>` : ''}
+      `;
+      btn.addEventListener('click', () => { cmd.action(); closeAllModals(); });
+      list.appendChild(btn);
+    });
+
+    list._filtered = filtered;
+  }
+
+  const cmdInput = document.getElementById('cmdInput');
+  cmdInput.addEventListener('input', () => renderCmdResults(cmdInput.value));
+
+  cmdInput.addEventListener('keydown', (e) => {
+    const list = document.getElementById('cmdList');
+    const items = Array.from(list.querySelectorAll('.cmd-item'));
+    if (items.length === 0) return;
+
+    if (e.key === 'ArrowDown'){
+      e.preventDefault();
+      cmdHighlight = Math.min(cmdHighlight + 1, items.length - 1);
+      items.forEach((el, i) => el.classList.toggle('highlighted', i === cmdHighlight));
+      items[cmdHighlight].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp'){
+      e.preventDefault();
+      cmdHighlight = Math.max(cmdHighlight - 1, 0);
+      items.forEach((el, i) => el.classList.toggle('highlighted', i === cmdHighlight));
+      items[cmdHighlight].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter'){
+      e.preventDefault();
+      items[cmdHighlight]?.click();
+    }
+  });
+
+  /* ================= Marquee tiles ================= */
   const tileDefs = [
     { cls: 'cyan', label: 'Unity Elites', icon: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/>' },
     { cls: 'dark', label: '', icon: '<path d="M4 18c3-6 6-10 8-14 2 4 5 8 8 14"/>' },
@@ -635,7 +1420,6 @@
   }
 
   function fillRow(rowEl, order){
-    // duplicate the sequence so the loop is seamless
     const seq = [...order, ...order];
     seq.forEach(def => rowEl.appendChild(buildTile(def)));
   }
